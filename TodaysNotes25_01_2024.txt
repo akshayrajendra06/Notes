@@ -1,0 +1,324 @@
+Advanced	Object	Oriented	Concepts
+Q) What	is	Polymorphism?
+
+Polymorphism	is	defined	as	“Same	Code” giving	“Different	Behavior”.	Let’s	look	at	an	example.	
+Let’s	define	an	Animal	class	with	a	method	shout.
+public class Animal	{
+				public String	shout()	{
+								return "Don't	Know!";
+				}
+}
+Let’s	create	two	new	sub	classes	of	Animal	overriding	the	existing	shout	method	in	Animal.
+class Cat	extends Animal	{
+				public String	shout()	{
+								return "Meow	Meow";
+				}
+}
+class Dog	extends Animal	{
+				public String	shout()	{
+								return "BOW	BOW";
+				}
+				public void run(){
+								
+				}
+}
+Look	at	the	code	below.	An	instance	of	Animal	class	is	created.	shout	method	is	called.	
+Animal	animal1	=	new Animal();								
+System.out.println(
+								animal1.shout());	//Don't	Know!
+Look	at	 the	 code	 below.	An	 instance	 of	Dog	 class	 is	 created	and	store	 in	a	 reference	 variable	 of	 type	
+Animal.
+Animal	animal2	=	new Dog();
+//Reference	variable	type	=>	Animal
+//Object	referred	to	=>	Dog
+//Dog's	bark	method	is	called.
+System.out.println(
+								animal2.shout());	//BOW	BOW
+When	shout	method	is	called	on	animal2,	it	invokes	the	shout	method	in	Dog	class	(type	of	the	object	
+pointed	to	by	reference	variable	animal2).
+Even	though	dog	has	a	method	run, it	cannot	be	invoked	using super	class	reference	variable.
+//animal2.run();//COMPILE	ERROR
+
+Q) What	is	the	use of	instanceof Operator in	Java?
+
+instanceof operator checks if an object is of a particular type. Let us consider the following class and
+interface declarations:
+class SuperClass	{
+};
+class SubClass	extends SuperClass	{
+};
+interface Interface	{
+};
+class SuperClassImplementingInteface	implements Interface	{
+};
+class SubClass2	extends SuperClassImplementingInteface	{
+};
+class SomeOtherClass	{
+};
+Let’s	consider	the	code	below.		We	create	a	few	instances	of	the	classes	declared	above.
+SubClass	subClass	=	new SubClass();
+Object	subClassObj	=	new SubClass();
+SubClass2	subClass2	=	new SubClass2();
+SomeOtherClass	someOtherClass =	new SomeOtherClass();
+Let’s	now	run	instanceof	operator	on	the	different	instances	created	earlier.
+System.out.println(subClass	instanceof SubClass);//true
+System.out.println(subClass	instanceof SuperClass);//true
+System.out.println(subClassObj	instanceof SuperClass);//true
+System.out.println(subClass2    instanceof SuperClassImplementingInteface);//true
+
+
+instanceof	can	be	used	with	interfaces	as	well.	Since	Super	Class	implements	the	interface,	below	code	
+prints	true.
+
+System.out.println(subClass2 instanceof Interface);//true
+If	the	type	compared	is	unrelated to	the	object,	a	compilation	error	occurs.
+//System.out.println(subClass
+//												instanceof SomeOtherClass);//Compiler	Error
+Object	referred	by	subClassObj(SubClass)- NOT	of	type	SomeOtherClass
+System.out.println(subClassObj	instanceof SomeOtherClass);//false
+
+Q) What	is	Coupling?
+
+Coupling is a measure of how much a class is dependent on other classes. There should minimal
+dependencies between classes. So, we should always aim for low coupling between classes.
+Coupling	Example	Problem
+Consider	the	example	below:
+class ShoppingCartEntry	{
+				public float price;
+				public int quantity;
+}
+class ShoppingCart	{
+				public ShoppingCartEntry[]	items;
+}
+class Order	{
+				private ShoppingCart	cart;
+				private float salesTax;
+				public Order(ShoppingCart	cart,	float salesTax)	{
+								this.cart =	cart;
+								this.salesTax =	salesTax;
+				}
+				//	This	method	know	the	internal	details	of	ShoppingCartEntry	and
+				//	ShoppingCart	classes.	If	there	is	any	change	in	any	of	those
+				//	classes,	this	method	also	needs	to	change.
+				public float orderTotalPrice()	{
+								float cartTotalPrice	=	0;
+								for (int i	=	0;	i	<	cart.items.length;	i++)	{
+												cartTotalPrice	+=	cart.items[i].price
+																				*	cart.items[i].quantity;
+								}
+								cartTotalPrice	+=	cartTotalPrice	*	salesTax;
+								return cartTotalPrice;
+				}
+}
+Method	 orderTotalPrice	 in	 Order	 class	 is	 coupled	 heavily	 with	 ShoppingCartEntry	 and	
+ShoppingCart	classes.		It	uses	different	properties	(items,	price,	quantity)	from	these classes.	If	any	of	
+these	properties	change,	orderTotalPrice	will	also	change.	This	is	not	good	for	Maintenance.	
+Solution
+
+Consider a better implementation with lesser coupling between classes below: In this implementation,
+changes in ShoppingCartEntry or CartContents might not affect Order class at all.
+class ShoppingCartEntry
+{
+				float price;
+				int quantity;
+				public float getTotalPrice()
+				{
+								return price *	quantity;
+				}
+}
+class CartContents
+{
+				ShoppingCartEntry[]	items;
+				public float getTotalPrice()
+				{
+								float totalPrice	=	0;
+								for (ShoppingCartEntry	item:items)
+								{
+												totalPrice	+=	item.getTotalPrice();
+								}
+								return totalPrice;
+				}
+}
+class Order
+{
+				private CartContents	cart;
+				private float salesTax;
+				public Order(CartContents	cart,	float salesTax)
+				{
+								this.cart =	cart;
+								this.salesTax =	salesTax;
+				}
+				public float totalPrice()
+				{
+								return cart.getTotalPrice()	*	(1.0f	+	salesTax);
+				}
+}
+
+
+Q) What	is	Cohesion?
+
+Cohesion is	a	measure	of	how	related	the	responsibilities	of	a	class	are.	 A	class	must	be	highly	cohesive	
+i.e.	its	responsibilities	(methods)	should	be	highly	related	to	one	another.
+Example	Problem
+Example class below is	 downloading	 from	 internet,	 parsing	 data	 and	 storing	 data	 to	 database. The	
+responsibilities	of	this	class	are	not	really	related.	This	is	not	cohesive	class.
+
+class DownloadAndStore{
+				void downloadFromInternet(){
+				}
+				
+				void parseData(){
+				}
+				
+				void storeIntoDatabase(){
+				}
+				
+				void doEverything(){
+								downloadFromInternet();
+								parseData();
+								storeIntoDatabase();
+				}
+}
+Solution
+This is a better way of approaching the problem. Different classes have their own responsibilities.
+class InternetDownloader	{
+				public void downloadFromInternet()	{
+				}
+}
+class DataParser	{
+				public void parseData()	{
+				}
+}
+class DatabaseStorer	{
+				public void storeIntoDatabase()	{
+				}
+}
+class DownloadAndStore	{
+				void doEverything()	{
+								new InternetDownloader().downloadFromInternet();
+								new DataParser().parseData();
+								new DatabaseStorer().storeIntoDatabase();
+				}
+}
+
+
+Q) What	is	Encapsulation?
+
+Encapsulation is “hiding the implementation of a Class behind a well defined interface”. Encapsulation
+helps us to change implementation of a class without breaking other code.
+Approach	1
+In	this	approach	we	create	a	public	variable	score.	The	main	method	directly	accesses	the	score	variable,	
+updates	it.
+public class CricketScorer	{
+				public int score;
+
+Let’s	use	the	CricketScorer	class.
+public static void main(String[]	args)	{
+CricketScorer	scorer	=	new CricketScorer();
+scorer.score =	scorer.score +	4;
+}
+
+Approach	2
+In	this	approach,	we	make	score	as	private	and	access	value	through	get	and	set	methods.	However,	the	
+logic	of	adding	4	to	the	score	is	performed	in	the	main	method.
+public class CricketScorer	{
+				private int score;
+				public int getScore()	{
+								return score;
+				}
+				public void setScore(int score)	{
+								this.score =	score;
+				}
+}
+Let’s	use	the	CricketScorer	class.
+public static void main(String[]	args)	{
+CricketScorer	scorer	=	new CricketScorer();
+int score	=	scorer.getScore();
+scorer.setScore(score	+	4);
+}
+
+Approach	3
+In this	approach	- For	better	encapsulation, the	logic	of	doing	 the	 four	operation	also	is	moved	 to	 the	
+CricketScorer	class.
+public class CricketScorer	{
+				private int score;
+				
+				public void four()	{
+								score +=	4;
+				}
+}
+Let’s	use	the	CricketScorer	class.
+public static void main(String[]	args)	{
+CricketScorer	scorer	=	new CricketScorer();
+scorer.four();
+}
+
+Description
+In	terms	of	encapsulation Approach	3	>	Approach	2	>	Approach	1.	In	Approach	3,	the	user	of	scorer	class	
+does	not even	know	that	there	is	a	variable	called	score. Implementation	of	Scorer	can	change	without	
+changing other	classes	using	Scorer.
+What	is	an	Inner	Class?
+Inner	Classes	are	classes	which	are	declared	inside	other	classes.	Consider	the	following	example:
+class OuterClass	{
+				public class InnerClass	{
+				}
+				public static class StaticNestedClass	{
+				}
+}
+
+Q) What	is	a	Static	Inner	Class?
+
+A	class	declared	directly	inside	another	class	and	declared	as	static.	In	 the	example	above,	class	name	
+StaticNestedClass	is a	static	inner	class.	
+Can	you	create	an	inner	class	inside	a	method?
+Yes.	 An	 inner	 class	 can	 be	 declared	 directly	 inside	 a	 method.	 In	 the	 example	 below,	 class	 name	
+MethodLocalInnerClass is	a	method	inner	class.	
+class OuterClass	{
+				public void exampleMethod()	{
+								class MethodLocalInnerClass {
+								};
+				}
+}
+Q) What	is	an	Anonymous	Class?
+
+
+Anonymous	Class	does	not	have	a	name.	Below	examples	shows	various	ways	to	create	Anonymous	
+classes.
+class Animal {
+void bark() {
+System.out.println("Animal Bark");
+}
+};
+public class AnonymousClass {
+private static String[] reverseSort(String[] array) {
+Comparator<String> reverseComparator = new Comparator<String>() {
+/* Anonymous Class */
+@Override
+public int compare(String string1,
+String string2) {
+return string2.compareTo(string1);
+}
+};
+Arrays.sort(array, reverseComparator);
+return array;
+}
+public static void main(String[] args) {
+String[] array = { "Apple", "Cat", "Boy" };
+System.out.println(Arrays
+.toString(reverseSort(array)));//[Cat, Boy, Apple]
+/* Second Anonymous Class - SubClass of Animal*/
+Animal animal = new Animal() {
+void bark() {
+System.out.println("Subclass bark");
+}
+};
+animal.bark();//Subclass bark
+}
+}
+
+
+
+				
+				
+
+
